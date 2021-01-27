@@ -69,9 +69,7 @@ def parse_args():
         "output_video", type=str, help="Where to store the output video"
     )
     parser.add_argument("output_json", type=str, help="Where to store the json")
-    parser.add_argument(
-        "--use_cuda", action="store_true", help="Whether to use GPU"
-    )
+    parser.add_argument("--use_cuda", action="store_true", help="Whether to use GPU")
     parser.add_argument(
         "--model_weights",
         type=str,
@@ -106,142 +104,166 @@ def main():
         if len(heads_bbox) > 0:
             final_results[i] = heads_bbox
 
-        # le heads che calcolavo con una delle prime funzioni le usavo per disegnare
-        # sui frame e avevo bisogno che fossero 4 numeri messi cosí: (x, y, h, w) mentre
-        # il codice per ottenere gli id delle persone e poi le sequenze funziona con
-        # (x1, y1, x2, y2) quindi convertiamo le bbox contenute in final result
+    # le heads che calcolavo con una delle prime funzioni le usavo per disegnare
+    # sui frame e avevo bisogno che fossero 4 numeri messi cosí: (x, y, h, w) mentre
+    # il codice per ottenere gli id delle persone e poi le sequenze funziona con
+    # (x1, y1, x2, y2) quindi convertiamo le bbox contenute in final result
 
-        for frame, heads in final_results.items():
-            for i, h in enumerate(heads):
-                heads[i] = pointsize_to_pointpoint(h)
+    for frame, heads in final_results.items():
+        for i, h in enumerate(heads):
+            heads[i] = pointsize_to_pointpoint(h)
 
-        id_num = 0
-        tracking_id = dict()
-        identity_last = dict()
-        frames_with_people = list(final_results.keys())
+    id_num = 0
+    tracking_id = dict()
+    identity_last = dict()
+    frames_with_people = list(final_results.keys())
 
-        frames_with_people.sort()
-        for i in frames_with_people:
-            speople = final_results[i]
-            identity_next = dict()
-            for j in range(len(speople)):
-                bbox_head = speople[j]
-                if bbox_head is None:
-                    continue
+    frames_with_people.sort()
+    for i in frames_with_people:
+        speople = final_results[i]
+        identity_next = dict()
+        for j in range(len(speople)):
+            bbox_head = speople[j]
+            if bbox_head is None:
+                continue
 
-                id_val = find_id(bbox_head, identity_last)
+            id_val = find_id(bbox_head, identity_last)
 
-                if id_val is None:
-                    id_num += 1
-                    id_val = id_num
+            if id_val is None:
+                id_num += 1
+                id_val = id_num
 
-                # TODO: Improve eye location
-                eyes = [
-                    (bbox_head[0] + bbox_head[2]) / 2.0,
-                    (0.65 * bbox_head[1] + 0.35 * bbox_head[3]),
-                ]
-                identity_next[id_val] = (bbox_head, eyes)
-            identity_last = identity_next
-            tracking_id[i] = identity_last
+            # TODO: Improve eye location
+            eyes = [
+                (bbox_head[0] + bbox_head[2]) / 2.0,
+                (0.65 * bbox_head[1] + 0.35 * bbox_head[3]),
+            ]
+            identity_next[id_val] = (bbox_head, eyes)
+        identity_last = identity_next
+        tracking_id[i] = identity_last
 
         # LOAD MODEL
-        device = "cuda" if args.use_cuda else "cpu"
+    device = "cuda" if args.use_cuda else "cpu"
 
-        model = GazeLSTM()
-        model = torch.nn.DataParallel(model).to(device)
-        model.to(device)
-        checkpoint = torch.load(args.model_weights)
-        model.load_state_dict(checkpoint["state_dict"])
-        model.eval()
+    model = GazeLSTM()
+    model = torch.nn.DataParallel(model).to(device)
+    model.to(device)
+    checkpoint = torch.load(args.model_weights)
+    model.load_state_dict(checkpoint["state_dict"])
+    model.eval()
 
-        image_normalize = transforms.Compose(
-            [
-                transforms.Resize((224, 224)),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-                ),
-            ]
+    image_normalize = transforms.Compose(
+        [
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+            ),
+        ]
+    )
+
+    video_stream = imageio.get_reader(video_name)
+    fps = video_stream.get_meta_data()["fps"]
+    out_video = imageio.get_writer(output_video_name, fps=fps)
+
+    color_encoding = []
+    for i in range(video_stream.count_frames()):
+        color_encoding.append(
+            [random.randint(0, 254), random.randint(0, 254), random.randint(0, 254)]
         )
 
-        video_stream = imageio.get_reader(video_name)
-        fps = video_stream.get_meta_data()["fps"]
-        out_video = imageio.get_writer(output_video_name, fps=fps)
+    W = max(int(fps // 8), 1)
 
-        color_encoding = []
-        for i in range(video_stream.count_frames()):
-            color_encoding.append(
-                [random.randint(0, 254), random.randint(0, 254), random.randint(0, 254)]
-            )
+    frames = {}
+    n_frames_init = 50
+    frames_to_keep_in_memory = n_frames_init * 2
+    n_frames = video_stream.count_frames()
+    n_frames_read = 0
+    first_frame_in_dict = 0
 
-        W = max(int(fps // 8), 1)
+    # read only the beginning of the video
+    for i in range(n_frames_init):
+        frames[i] = video_stream.get_next_data()
+        n_frames_read += 1
+
+    # frame shape is H, W, C
+    HEIGHT, WIDTH = frames[0].shape[:2]
 
 
-        v = []
-        # TODO read only first 50 frames
-        # TODO make v a dict
-        # {
-        #     # 0: frame
-        #     1: frame
-        #     ...
-        #     50: frame
-        #     51: frame
-        # }
-        for i in tqdm(range(video_stream.count_frames())):
-            v.append(video_stream.get_next_data())
+    coords = []
 
-        # frame shape is H, W, C
-        HEIGHT, WIDTH = v[0].shape[:2]
+    print("Excuting gaze360...")
+    # for each frame in the video
+    for i in tqdm(range(n_frames)):
+        image = frames[i].copy()
 
-        coords = []
-        for i in tqdm(range(0, len(v))):
-            image = v[i].copy()
-            # TODO check this
-            image = cv2.resize(image, (WIDTH, HEIGHT))
-            image = image.astype(float)
-            if i in tracking_id:
-                for id_t in tracking_id[i].keys():
-                    coord = {}
-                    input_image = torch.zeros(7, 3, 224, 224)
-                    count = 0
-                    for j in range(i - 3 * W, i + 4 * W, W):
-                        if j in tracking_id and id_t in tracking_id[j]:
-                            new_im = Image.fromarray(v[j], "RGB")
-                            bbox, eyes = tracking_id[j][id_t]
-                        else:
-                            new_im = Image.fromarray(v[i], "RGB")
-                            bbox, eyes = tracking_id[i][id_t]
-                        new_im = new_im.crop((bbox[0], bbox[1], bbox[2], bbox[3]))
-                        input_image[count, :, :, :] = image_normalize(new_im)
-                        count = count + 1
+        # TODO check this
+        image = cv2.resize(image, (WIDTH, HEIGHT))
+        image = image.astype(float)
 
-                    bbox, eyes = tracking_id[i][id_t]
-                    bbox = np.asarray(bbox).astype(int)
-                    output_gaze, _ = model(
-                        input_image.view(1, 7, 3, 224, 224).to(device)
-                    )
-                    gaze = spherical2cartesial(output_gaze).detach().numpy()
-                    eyes = np.asarray(eyes).astype(float)
-                    # eyes[0],eyes[1] = eyes[0]/float(v[i].shape[1]),eyes[1]/float( v[i].shape[0])
-                    gaze = gaze.reshape((-1))
-                    image = render_frame(image, eyes, gaze, bbox)
-                    coord = {
-                        "frame": i,
-                        "id_t": id_t,
-                        "eyes": eyes,
-                        "gaze": gaze,
-                        "bbox": bbox,
-                    }
-                    coords.append(coord)
+        # if there are people identified in this frame
+        if i in tracking_id:
+            # for each identified person
+            for id_t in tracking_id[i].keys():
+                coord = {}
+                # input_image shape is: (seq_len x ch x W x H)
+                input_image = torch.zeros(7, 3, 224, 224)
+                count = 0
 
-            # TODO remove first frame and read next one
-                    
-            image = image.astype(np.uint8)
-            out_video.append_data(image)
-        out_video.close()
+                # extract frames from the past and the future to create the input
+                # sequence for gaze360
+                for j in range(i - 3 * W, i + 4 * W, W):
+                    # if frame `j` contains person `id_t`
+                    if j in tracking_id and id_t in tracking_id[j]:
+                        new_im = Image.fromarray(frames[j], "RGB")
+                        bbox, eyes = tracking_id[j][id_t]
+                    else:
+                        new_im = Image.fromarray(frames[i], "RGB")
+                        bbox, eyes = tracking_id[i][id_t]
 
-        coords = pd.DataFrame(coords)
-        coords.to_json(output_json_name)
+                    # crop the head out of the frame
+                    new_im = new_im.crop((bbox[0], bbox[1], bbox[2], bbox[3]))
+                    input_image[count, :, :, :] = image_normalize(new_im)
+                    count = count + 1
+
+                # run the model
+                output_gaze, _ = model(
+                    input_image.view(1, 7, 3, 224, 224).to(device)
+                )
+                gaze = spherical2cartesial(output_gaze).detach().numpy()
+                gaze = gaze.reshape((-1))
+
+                bbox, eyes = tracking_id[i][id_t]
+                bbox = np.asarray(bbox).astype(int)
+                eyes = np.asarray(eyes).astype(float)
+
+                image = render_frame(image, eyes, gaze, bbox)
+                coord = {
+                    "frame": i,
+                    "id_t": id_t,
+                    "eyes": eyes,
+                    "gaze": gaze,
+                    "bbox": bbox,
+                }
+                coords.append(coord)
+
+        # TODO remove first frame and read next one
+
+        # read next frame, until there are frames to read
+        if n_frames_read < n_frames:
+            frames[n_frames_read] = video_stream.get_next_data()
+            n_frames_read += 1
+
+        if n_frames_read - first_frame_in_dict > frames_to_keep_in_memory:
+            del frames[first_frame_in_dict]
+            first_frame_in_dict += 1
+
+        image = image.astype(np.uint8)
+        out_video.append_data(image)
+    out_video.close()
+
+    coords = pd.DataFrame(coords)
+    coords.to_json(output_json_name)
 
 
 if __name__ == "__main__":
