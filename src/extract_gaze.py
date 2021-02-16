@@ -66,9 +66,9 @@ def parse_args():
     )
     parser.add_argument("input_video", type=str, help="Input video")
     parser.add_argument(
-        "output_video", type=str, help="Where to store the output video"
+        "output_video", type=str, help="Folder where to store the output video"
     )
-    parser.add_argument("output_json", type=str, help="Where to store the json")
+    parser.add_argument("output_json", type=str, help="Folder where to store the json")
     parser.add_argument("--use_cuda", action="store_true", help="Whether to use GPU")
     parser.add_argument(
         "--model_weights",
@@ -247,8 +247,6 @@ def main():
                 }
                 coords.append(coord)
 
-        # TODO remove first frame and read next one
-
         # read next frame, until there are frames to read
         if n_frames_read < n_frames:
             frames[n_frames_read] = video_stream.get_next_data()
@@ -260,6 +258,8 @@ def main():
 
         image = image.astype(np.uint8)
         out_video.append_data(image)
+    
+    video_stream.close()
     out_video.close()
 
     coords = pd.DataFrame(coords)

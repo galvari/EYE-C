@@ -8,7 +8,7 @@ import imageio
 import numpy as np
 from tqdm import tqdm
 
-from src.utils import extract_all_faces
+from utils import extract_all_faces
 
 
 def parse_args():
@@ -62,6 +62,8 @@ def main():
 
         frame = frame.astype(np.uint8)
         out_video.append_data(frame)
+
+    video_stream.close()
     out_video.close()
 
 
