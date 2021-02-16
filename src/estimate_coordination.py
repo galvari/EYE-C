@@ -129,15 +129,20 @@ def main():
         ]
 
         e0, g0, b0 = map(np.array, person[["eyes", "gaze", "bbox"]])
+        my_bbox_size = b0[2] - b0[0]
 
         dist_min = np.inf
         y_gaze_min = np.inf
 
         dists_towards_others = []
         dists_towards_me = []
+        others_bbox_size = []
 
+        # for each other people in frame
         for _, op in other_people.iterrows():
             e1, g1, b1 = map(np.array, op[["eyes", "gaze", "bbox"]])
+            other_bbox_size = b1[2] - b1[0]
+            others_bbox_size.append(other_bbox_size)
 
             # calcolo distanza da dove interseca vettore g0 la x di e1: y di incrocio - y di e1
             y_gaze_to_other, looking_towards_other = gaze_y_other_person(e0, e1, g0)
@@ -164,12 +169,13 @@ def main():
                 y_gaze_min = y_gaze_to_other
 
         # find if person is involved in coordination
-        threshold = 1000
-
         dists_towards_others = np.array(dists_towards_others)
         dists_towards_me = np.array(dists_towards_me)
 
-        if np.any((dists_towards_others < threshold) & (dists_towards_me < threshold)):
+        if np.any(
+                (dists_towards_others < others_bbox_size)
+                & (dists_towards_me < my_bbox_size)
+            ):
             coordination = True
         else:
             coordination = False
