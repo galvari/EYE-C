@@ -77,6 +77,18 @@ def parse_args():
         default="models/gaze360_model.pth.tar",
     )
 
+    # by default these 2 are False
+    parser.add_argument(
+        "--maximize_boxes",
+        action="store_true",
+        help="Whether to set box size as the largest of the same sequence",
+    )
+    parser.add_argument(
+        "--enlarge_boxes",
+        action="store_true",
+        help="Make the box larger of a fixed factor",
+    )
+
     # read and parse command line arguments
     args = parser.parse_args()
     return args
@@ -88,7 +100,7 @@ def main():
     input_folder = Path(args.input_folder)
     video_name = args.input_video
     output_video_name = Path(args.output_video) / f"{Path(video_name).stem}_gaze.mp4"
-    output_json_name = Path(args.output_json) / f"{Path(video_name).stem}_coords.json"
+    output_json_name = Path(args.output_json) / f"{Path(video_name).stem}_gazes.json"
 
     # find and sort all json files
     keypoint_files = sorted(glob.glob(str(input_folder / "*.json")))
@@ -142,7 +154,48 @@ def main():
         identity_last = identity_next
         tracking_id[i] = identity_last
 
-        # LOAD MODEL
+    # maximize boxes
+    if args.maximize_boxes:
+        bbox_in_frame = {}
+
+        for frame, ids in tracking_id.items():
+            for i, (bbox, eyes) in ids.items():
+                if i not in bbox_in_frame:
+                    bbox_in_frame[i] = []
+
+                bbox_in_frame[i].append(bbox)
+
+        bbox_in_frame = {i: np.vstack(bboxs) for i, bboxs in bbox_in_frame.items()}
+        bbox_sizes = {
+            i: bboxs[:, 2] - bboxs[:, 0] for i, bboxs in bbox_in_frame.items()
+        }
+        max_bbox_sizes = {
+            i: (bboxs[:, 2] - bboxs[:, 0]).max() for i, bboxs in bbox_in_frame.items()
+        }
+
+        tracking_id_max_size = {}
+
+        for frame, ids in tracking_id.items():
+            tracking_id_max_size[frame] = {}
+
+            for subject, (bbox, eyes) in ids.items():
+                center_x, center_y = (bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2
+
+                new_bbox = np.array(
+                    [
+                        center_x - max_bbox_sizes[subject] / 2,
+                        center_y - max_bbox_sizes[subject] / 2,
+                        center_x + max_bbox_sizes[subject] / 2,
+                        center_y + max_bbox_sizes[subject] / 2,
+                    ]
+                )
+
+                tracking_id_max_size[frame][subject] = (new_bbox, eyes)
+
+        # replace original boxes with same size boxes (max size)
+        tracking_id = tracking_id_max_size
+
+    # LOAD MODEL
     device = "cuda" if args.use_cuda else "cpu"
 
     model = GazeLSTM()
@@ -156,9 +209,7 @@ def main():
         [
             transforms.Resize((224, 224)),
             transforms.ToTensor(),
-            transforms.Normalize(
-                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-            ),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
     )
 
@@ -172,6 +223,7 @@ def main():
             [random.randint(0, 254), random.randint(0, 254), random.randint(0, 254)]
         )
 
+    # with 30 fps: W = 3
     W = max(int(fps // 8), 1)
 
     frames = {}
@@ -188,7 +240,6 @@ def main():
 
     # frame shape is H, W, C
     HEIGHT, WIDTH = frames[0].shape[:2]
-
 
     coords = []
 
@@ -222,14 +273,28 @@ def main():
                         bbox, eyes = tracking_id[i][id_t]
 
                     # crop the head out of the frame
-                    new_im = new_im.crop((bbox[0], bbox[1], bbox[2], bbox[3]))
+                    # bbox is an array of 4 numbers, representing
+                    # (left, top, right, bottom)
+                    if args.enlarge_boxes:
+                        # bbox is squared, now double each side
+                        bbox_size = bbox[2] - bbox[0]
+                        bbox_size = bbox_size * 0.25
+                        new_im = new_im.crop(
+                            (
+                                bbox[0] - bbox_size,
+                                bbox[1] - bbox_size,
+                                bbox[2] + bbox_size,
+                                bbox[3] + bbox_size,
+                            )
+                        )
+                    else:
+                        new_im = new_im.crop((bbox[0], bbox[1], bbox[2], bbox[3]))
+
                     input_image[count, :, :, :] = image_normalize(new_im)
                     count = count + 1
 
                 # run the model
-                output_gaze, _ = model(
-                    input_image.view(1, 7, 3, 224, 224).to(device)
-                )
+                output_gaze, _ = model(input_image.view(1, 7, 3, 224, 224).to(device))
                 gaze = spherical2cartesial(output_gaze).detach().numpy()
                 gaze = gaze.reshape((-1))
 
@@ -258,7 +323,7 @@ def main():
 
         image = image.astype(np.uint8)
         out_video.append_data(image)
-    
+
     video_stream.close()
     out_video.close()
 

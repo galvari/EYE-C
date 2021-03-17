@@ -19,6 +19,13 @@ from utils import compute_iou, extract_all_faces, pointsize_to_pointpoint
 
 
 def gaze_y_other_person(e0, e1, g0):
+    """
+    Given 2 people (0 and 1), estimate the y-distance between the eyes of person-1 and
+    the point person-0 is looking at, taking into consideration its gaze vector.
+    The distance is calculated enlonging the line starting from the eyes of person-0
+    (e0) on the direction specified by g0 until the x-position of the eyes of person-1.
+    The distance between the 2 y is returned.
+    """
     # point1 is the origin of the arrow
     # point2 is a second point on the arrow
     point1, point2 = e0, e0 + g0[:2] * [-1, -1]
@@ -30,15 +37,18 @@ def gaze_y_other_person(e0, e1, g0):
 
     # e1 contains eyes coordinates of the other person
     x = e1[0]
+    # enlong gaze line
     y = m * x + b
 
+    # check whether the arrow is really pointing towards the other subject
     # if (e0[0], point2[0]) -> e1[0] then 0 is looking towards 1
-    # elif e[1] - (e0[0], point2[0]) -> 0 is not looking towards 2
+    # elif (e0[0], point2[0]) -> 0 is not looking towards 1
 
     x0 = e0[0]
     x0_gaze = point2[0]
     x1 = e1[0]
 
+    # if (x0 < x0_gaze < x1) or (x1 < x0_gaze < x0)
     if (x0 < x0_gaze and x0_gaze < x1) or (x1 < x0_gaze and x0_gaze < x0):
         # 0 is looking towards 1
         looking_towards = True
@@ -96,6 +106,12 @@ def parse_args():
     parser.add_argument(
         "--output_folder", type=str, help="Where to store the output video"
     )
+    parser.add_argument(
+        "--coordination_factor",
+        type=float,
+        default=1,
+        help="Scaling factor to check for coordination",
+    )
 
     args = parser.parse_args()
 
@@ -110,7 +126,7 @@ def main():
     args = parse_args()
 
     coords_file = Path(args.input_coords)
-    output_json_name = coords_file.parent / f"{coords_file.stem}_coordination.json"
+    output_json_name = coords_file.parent / f"{coords_file.stem}_coordinations.json"
 
     coords_df = pd.read_json(coords_file)
 
@@ -118,7 +134,7 @@ def main():
 
     # TODO first compute dists and applying filtering
 
-    # gira su persone identificate in coords (person e' una persona)
+    # gira su persone identificate in coords
     print("Finding dists...")
     for i, person in tqdm(coords_df.iterrows(), total=len(coords_df)):
         coordination = False
@@ -172,10 +188,11 @@ def main():
         dists_towards_others = np.array(dists_towards_others)
         dists_towards_me = np.array(dists_towards_me)
 
+        # check if there is coordination
         if np.any(
-                (dists_towards_others < others_bbox_size)
-                & (dists_towards_me < my_bbox_size)
-            ):
+            (dists_towards_others < others_bbox_size * args.coordination_factor)
+            & (dists_towards_me < my_bbox_size * args.coordination_factor)
+        ):
             coordination = True
         else:
             coordination = False

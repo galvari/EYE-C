@@ -70,7 +70,7 @@ def extract_all_faces(people):
     for p in people:
         keypoints = p["pose_keypoints_2d"]
 
-        # keypoints is a list of (x, y, confidence)
+        # keypoints is a list of (x1, y1, confidence1, x2, y2, confidence2)
         # reshape to (N_people, 3)
         keypoints = np.reshape(keypoints, (-1, 3))
 
