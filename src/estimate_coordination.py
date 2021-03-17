@@ -100,7 +100,7 @@ def render_frame(image, dists, coordinations):
 def parse_args():
     parser = argparse.ArgumentParser(description="Visualize video with openpose heads.")
 
-    parser.add_argument("input_coords", type=str, help="Input coords file")
+    parser.add_argument("input_coords", type=str, help="Input gaze file")
 
     parser.add_argument("--input_video", type=str, help="Input video")
     parser.add_argument(

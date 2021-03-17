@@ -21,7 +21,7 @@ def parse_args():
     )
     parser.add_argument("input_video", type=str, help="Input video")
     parser.add_argument(
-        "output_video", type=str, help="Where to store the output video"
+        "output_folder", type=str, help="Where to store the output video"
     )
 
     # read and parse command line arguments
@@ -34,7 +34,7 @@ def main():
 
     input_folder = Path(args.input_folder)
     video_name = args.input_video
-    output_video_name = Path(args.output_video) / f"{Path(video_name).stem}_heads.mp4"
+    output_video_name = Path(args.output_folder) / f"{Path(video_name).stem}_heads.mp4"
 
     # find and sort all json files
     keypoint_files = sorted(glob.glob(str(input_folder / "*.json")))

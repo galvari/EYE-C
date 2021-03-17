@@ -66,9 +66,9 @@ def parse_args():
     )
     parser.add_argument("input_video", type=str, help="Input video")
     parser.add_argument(
-        "output_video", type=str, help="Folder where to store the output video"
+        "output_video_folder", type=str, help="Folder where to store the output video"
     )
-    parser.add_argument("output_json", type=str, help="Folder where to store the json")
+    parser.add_argument("output_json_folder", type=str, help="Folder where to store the json")
     parser.add_argument("--use_cuda", action="store_true", help="Whether to use GPU")
     parser.add_argument(
         "--model_weights",
@@ -99,8 +99,8 @@ def main():
 
     input_folder = Path(args.input_folder)
     video_name = args.input_video
-    output_video_name = Path(args.output_video) / f"{Path(video_name).stem}_gaze.mp4"
-    output_json_name = Path(args.output_json) / f"{Path(video_name).stem}_gazes.json"
+    output_video_name = Path(args.output_video_folder) / f"{Path(video_name).stem}_gaze.mp4"
+    output_json_name = Path(args.output_json_folder) / f"{Path(video_name).stem}_gazes.json"
 
     # find and sort all json files
     keypoint_files = sorted(glob.glob(str(input_folder / "*.json")))
