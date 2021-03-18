@@ -25,14 +25,13 @@ GPU_NUMBER=$5
 for i in ${INPUT_KEYPOINTS_FOLDER}/*; do
     echo $i
 
-    # path/to/video_name.mp4
-    out=${i%.*}  # path/to/video_name
-    out=${out##*/}  # video_name
+    # path/to/video_id
+    id=${i##*/}  # video_id
 
     CUDA_VISIBLE_DEVICES=1 python src/extract_gaze.py \
         --use_cuda \
         $i \
-        ${INPUT_VIDEO_FOLDER}/${i}.mp4 \
+        ${INPUT_VIDEO_FOLDER}/${id}.mp4 \
         ${OUTPUT_VIDEO_FOLDER} \
         ${OUTPUT_JSON_FOLDER} \
          --use_cuda \
