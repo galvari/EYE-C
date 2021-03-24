@@ -2,6 +2,7 @@ INPUT_FOLDER=$1
 OUTPUT_FOLDER=$2
 
 OPENPOSE_BIN=/home/gbertamini/openpose/build/examples/openpose/openpose.bin
+MODEL_FOLDER=/home/gbertamini/openpose/models/
 
 for i in ${INPUT_FOLDER}/*; do
     echo $i
@@ -14,7 +15,8 @@ for i in ${INPUT_FOLDER}/*; do
         --video $i \
         --write_json ${OUTPUT_FOLDER}/$out/ \
         --display 0 \
-        --render_pose 0
+        --render_pose 0 \
+        --model_folder $MODEL_FOLDER
 
     echo "-----------------------------------"
     echo
