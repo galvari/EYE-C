@@ -289,7 +289,7 @@ def main():
                 )
 
                 depth = (
-                    depth or y_gazes_frame.loc[person.id_t].depth
+                    depth or y_gazes_frame.loc[person.id_t].depth_towards_each_other
                 )
 
             f["coordination"] = coordination
