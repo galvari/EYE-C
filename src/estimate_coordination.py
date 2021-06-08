@@ -203,6 +203,10 @@ def main():
         dists_towards_others = np.array(dists_towards_others)
         dists_towards_me = np.array(dists_towards_me)
 
+
+        my_bbox_size = np.array(my_bbox_size)
+        others_bbox_size = np.array(others_bbox_size)
+
         # check if there is coordination between with any other people by
         # checking the arrows are poiting towards the bounding box of each other
         # and the depth vector are pointing towards each other
