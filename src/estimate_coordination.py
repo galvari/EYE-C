@@ -154,6 +154,8 @@ def main():
         dists_towards_me = []
         others_bbox_size = []
 
+        depth_towards_each_other = False
+
         # for each other people in frame
         for _, op in other_people.iterrows():
             e1, g1, b1 = map(np.array, op[["eyes", "gaze", "bbox"]])
@@ -184,12 +186,27 @@ def main():
                 dist_min = dist
                 y_gaze_min = y_gaze_to_other
 
+                # if both are great enough, should point one towards the other
+                if np.all(np.abs((g0[2], g1[2])) > 0.2):
+                    sign = g0[2] / g1[2]
+
+                    # check if vectors point at the opposite direction
+                    depth_towards_each_other = True if sign < 0 else False
+                
+                # if at least one is pointing towards the camera or the background
+                elif np.any(np.abs((g0[2], g1[2])) > 0.2):
+                    depth_towards_each_other = False
+                else:
+                    depth_towards_each_other = True
+
         # find if person is involved in coordination
         dists_towards_others = np.array(dists_towards_others)
         dists_towards_me = np.array(dists_towards_me)
 
-        # check if there is coordination
-        if np.any(
+        # check if there is coordination between with any other people by
+        # checking the arrows are poiting towards the bounding box of each other
+        # and the depth vector are pointing towards each other
+        if depth_towards_each_other and np.any(
             (dists_towards_others < others_bbox_size * args.coordination_factor)
             & (dists_towards_me < my_bbox_size * args.coordination_factor)
         ):
@@ -204,6 +221,7 @@ def main():
                 "y_gaze": y_gaze_min,
                 "dist": dist_min,
                 "coordination": coordination,
+                "depth_towards_each_other": depth_towards_each_other,
             }
         )
 
@@ -224,9 +242,11 @@ def main():
             f"y_gaze{num_person}",
             f"dist{num_person}",
             f"coordination{num_person}",
+            f"depth{num_person}",
         ]
 
     c += ["coordination"]
+    c += ["depth"]
 
     print("Generate output json...")
     for frame in tqdm(range(num_frames)):
@@ -240,6 +260,7 @@ def main():
         f["num_people"] = len(people)
 
         coordination = False
+        depth = False
 
         # if there are 1 to 3 people
         if len(people) > 1 and len(people) <= 3:
@@ -255,6 +276,7 @@ def main():
                 f[f"y_gaze{i}"] = y_gazes_frame.loc[person.id_t].y_gaze
                 f[f"dist{i}"] = y_gazes_frame.loc[person.id_t].dist
                 f[f"coordination{i}"] = y_gazes_frame.loc[person.id_t].coordination
+                f[f"depth{i}"] = y_gazes_frame.loc[person.id_t].depth_towards_each_other
 
                 # update coordination variable if coordination was found with this
                 # person
@@ -262,7 +284,12 @@ def main():
                     coordination or y_gazes_frame.loc[person.id_t].coordination
                 )
 
+                depth = (
+                    depth or y_gazes_frame.loc[person.id_t].depth
+                )
+
             f["coordination"] = coordination
+            f["depth"] = depth
 
         out.append(f)
 
