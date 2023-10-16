@@ -1,5 +1,5 @@
 # EYE-C
-A Gaze360 implementation to extract Gaze-Coordination events from wild videos
+A Gaze360 implementation to extract Eye-Contact events from wild videos
 
 This implementation makes use of the original Gaze360 code, that can be found at https://github.com/erkil1452/gaze360
 
