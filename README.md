@@ -1,10 +1,11 @@
 # EYE-C
-A Gaze360 implementation to extract Eye-Contact events from wild videos
 
-This implementation makes use of the original Gaze360 code, that can be found at https://github.com/erkil1452/gaze360
+A Openpose+Gaze360 implementation to extract Eye-Contact events from wild clinica videos, via a single videocamera.
+
+This application makes use of the original Openpose and Gaze360 code, that can be found at https://github.com/CMU-Perceptual-Computing-Lab/openpose and https://github.com/erkil1452/gaze360 respectively.
 
 ## Usage
-run openpose on the videos to extract the keypoint files
+1. run openpose on the videos to extract the keypoint files
 
 optional: run `visualize_faces.py` to visualize the bbox generated from the keypoint files.
 ```
@@ -14,7 +15,7 @@ Arguments:
     output_folder
 ```
 
-run `extract_gaze.py` to generate gaze json files containing the gaze for each subject in each frame. Also renders the video with gazing arrows.
+2. run `extract_gaze.py` to generate gaze json files containing the gaze for each subject in each frame. Also renders the video with gazing arrows.
 ```
 Arguments:
     input_folder: folder where keypoints file for the video are stored
@@ -27,7 +28,7 @@ Arguments:
     --enlarge_boxes: whether to enlarge the box used to crop the heads
 ```
 
-run `estimate_coordination.py` to generate coordination json files for each frame of the video. Optionally render the video with printed distances.
+3. run `estimate_coordination.py` to generate coordination json files for each frame of the video. Optionally render the video with printed distances.
 ```
 Arguments:
     input_coords: input gaze file (used also for naming the output file)
@@ -38,8 +39,31 @@ Arguments:
 
 _______
 
-Reference paper:
+References:
 
-* Petr Kellnhofer*, Adrià Recasens*, Simon Stent, Wojciech Matusik, and Antonio Torralba. “Gaze360: Physically Unconstrained Gaze Estimation in the Wild”. IEEE International Conference on Computer Vision (ICCV), 2019.
+@article{alvari2021eye,
+  title={EYE-C: eye-contact robust detection and analysis during unconstrained child-therapist interactions in the clinical setting of autism spectrum disorders},
+  author={Alvari, Gianpaolo and Coviello, Luca and Furlanello, Cesare},
+  journal={Brain Sciences},
+  volume={11},
+  number={12},
+  pages={1555},
+  year={2021},
+  publisher={MDPI}
+}
 
-* Gianpaolo Alvari*, Luca Coviello, and Cesare Furlanello. "EYE-C: Eye-Contact Robust Detection and Analysis during Unconstrained Child-Therapist Interactions in the Clinical Setting of Autism Spectrum Disorders". Brain Sciences, 2021.
+@inproceedings{kellnhofer2019gaze360,
+  title={Gaze360: Physically unconstrained gaze estimation in the wild},
+  author={Kellnhofer, Petr and Recasens, Adria and Stent, Simon and Matusik, Wojciech and Torralba, Antonio},
+  booktitle={Proceedings of the IEEE/CVF international conference on computer vision},
+  pages={6912--6921},
+  year={2019}
+}
+
+@article{8765346,
+  author = {Z. {Cao} and G. {Hidalgo Martinez} and T. {Simon} and S. {Wei} and Y. A. {Sheikh}},
+  journal = {IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  title = {OpenPose: Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields},
+  year = {2019}
+}
+
