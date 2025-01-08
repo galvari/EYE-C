@@ -1,19 +1,3 @@
-# python src/extract_gaze.py --use_cuda ../INPUT/JSON/Example_copycodec/1348_high_copycodec/ ../INPUT/Videos/Example_mp4_copycodec/1348_high_copycodec.mp4 ../OUTPUT/Render_copycodec/ ../OUTPUT/JSON_copycodec/
-# python src/extract_gaze.py --use_cuda ../INPUT/JSON/Example_copycodec/1472_med_copycodec/ ../INPUT/Videos/Example_mp4_copycodec/1472_med_copycodec.mp4 ../OUTPUT/Render_copycodec/ ../OUTPUT/JSON_copycodec/
-# python src/extract_gaze.py --use_cuda ../INPUT/JSON/Example_copycodec/1507_med_copycodec/ ../INPUT/Videos/Example_mp4_copycodec/1507_med_copycodec.mp4 ../OUTPUT/Render_copycodec/ ../OUTPUT/JSON_copycodec/
-# python src/extract_gaze.py --use_cuda ../INPUT/JSON/Example_copycodec/1541_high_copycodec/ ../INPUT/Videos/Example_mp4_copycodec/1541_high_copycodec.mp4 ../OUTPUT/Render_copycodec/ ../OUTPUT/JSON_copycodec/
-# python src/extract_gaze.py --use_cuda ../INPUT/JSON/Example_copycodec/1670_low_copycodec/ ../INPUT/Videos/Example_mp4_copycodec/1670_low_copycodec.mp4 ../OUTPUT/Render_copycodec/ ../OUTPUT/JSON_copycodec/
-# python src/extract_gaze.py --use_cuda ../INPUT/JSON/Example_copycodec/1730_high_copycodec/ ../INPUT/Videos/Example_mp4_copycodec/1730_high_copycodec.mp4 ../OUTPUT/Render_copycodec/ ../OUTPUT/JSON_copycodec/
-# python src/extract_gaze.py --use_cuda ../INPUT/JSON/Example_copycodec/1815_med_copycodec/ ../INPUT/Videos/Example_mp4_copycodec/1815_med_copycodec.mp4 ../OUTPUT/Render_copycodec/ ../OUTPUT/JSON_copycodec/
-# python src/extract_gaze.py --use_cuda ../INPUT/JSON/Example_copycodec/1830_high_copycodec/ ../INPUT/Videos/Example_mp4_copycodec/1830_high_copycodec.mp4 ../OUTPUT/Render_copycodec/ ../OUTPUT/JSON_copycodec/
-# python src/extract_gaze.py --use_cuda ../INPUT/JSON/Example_copycodec/982_low_copycodec/ ../INPUT/Videos/Example_mp4_copycodec/982_low_copycodec.mp4 ../OUTPUT/Render_copycodec/ ../OUTPUT/JSON_copycodec/
-
-
-
-# python src/extract_gaze.py --use_cuda ./INPUT/JSON/Example_copycodec/1670_low_copycodec/ ./INPUT/Videos/Example_mp4_copycodec/1670_low_copycodec.mp4 ./OUTPUT_BBOX5/Render_copycodec/ ./OUTPUT_BBOX5/JSON_copycodec/
-# python src/extract_gaze.py --use_cuda ./INPUT/JSON/Example_copycodec/1730_high_copycodec/ ./INPUT/Videos/Example_mp4_copycodec/1730_high_copycodec.mp4 ./OUTPUT_BBOX5/Render_copycodec/ ./OUTPUT_BBOX5/JSON_copycodec/
-# python src/extract_gaze.py --use_cuda ./INPUT/JSON/Example_copycodec/982_low_copycodec/ ./INPUT/Videos/Example_mp4_copycodec/982_low_copycodec.mp4 ./OUTPUT_BBOX5/Render_copycodec/ ./OUTPUT_BBOX5/JSON_copycodec/
-
 
 INPUT_KEYPOINTS_FOLDER=$1
 INPUT_VIDEO_FOLDER=$2
