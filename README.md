@@ -1,6 +1,6 @@
 # EYE-C
 
-A Openpose+Gaze360 implementation to extract Eye-Contact events from wild clinica videos, via a single videocamera.
+A Openpose+Gaze360 implementation to extract Eye-Contact events from wild clinical videos, via a single videocamera.
 
 This application makes use of the original Openpose and Gaze360 code, that can be found at https://github.com/CMU-Perceptual-Computing-Lab/openpose and https://github.com/erkil1452/gaze360 respectively.
 
