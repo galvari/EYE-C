@@ -1,4 +1,5 @@
 # EYE-C
+## Eye-Contact Robust Detection in Unconstrained Child-Adult Interactions
 
 A Openpose+Gaze360 implementation to extract Eye-Contact events from wild clinical videos, via a single videocamera.
 
