@@ -1,9 +1,15 @@
-# EYE-C
-## Eye-Contact Robust Detection in Unconstrained Child-Adult Interactions
+# EYE-C: Eye-Contact Robust Detection in Unconstrained Child-Adult Interactions
 
-A Openpose+Gaze360 implementation to extract Eye-Contact events from wild clinical videos, via a single videocamera.
-
+A Openpose+Gaze360 implementation to extract multi-person Eye-Contact events from wild clinical videos, via a single videocamera.
 This application makes use of the original Openpose and Gaze360 code, that can be found at https://github.com/CMU-Perceptual-Computing-Lab/openpose and https://github.com/erkil1452/gaze360 respectively.
+
+EYE-C is implemented in 3 connected modules:
+* Openpose: headboxes detection
+* Gaze360: gaze vectors estimation
+* EYE-C: eye-contact prediction
+  
+Details about the implementation and validation can be found in the original paper:
+[EYE-C: Eye-Contact Robust Detection and Analysis during Unconstrained Child-Therapist Interactions in the Clinical Setting of Autism Spectrum Disorders](https://www.mdpi.com/2076-3425/11/12/1555)
 
 ## Usage
 1. run openpose on the videos to extract the keypoint files
