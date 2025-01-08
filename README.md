@@ -2,19 +2,20 @@
 
 ## About
 A Openpose+Gaze360 implementation to extract multi-person Eye-Contact events from wild clinical videos, via a single videocamera.
-This application makes use of the original Openpose and Gaze360 code, that can be found at https://github.com/CMU-Perceptual-Computing-Lab/openpose and https://github.com/erkil1452/gaze360 respectively.
+This application makes use of the original [Openpose](https://ieeexplore.ieee.org/document/8765346) and [Gaze360](https://gaze360.csail.mit.edu/) GitHub code, that can be found at [Openpose](https://github.com/CMU-Perceptual-Computing-Lab/openpose) and [Gaze360](https://github.com/erkil1452/gaze360) respectively.
 
 EYE-C is implemented in 3 connected modules:
 * Openpose: headboxes detection
 * Gaze360: gaze vectors estimation
 * EYE-C: eye-contact prediction
   
+
 Details about the implementation and validation can be found in the original paper:
 [EYE-C: Eye-Contact Robust Detection and Analysis during Unconstrained Child-Therapist Interactions in the Clinical Setting of Autism Spectrum Disorders](https://www.mdpi.com/2076-3425/11/12/1555)
 
+
 Please if you use our code cite our paper as:
 Alvari, G., Coviello, L., & Furlanello, C. (2021). EYE-C: eye-contact robust detection and analysis during unconstrained child-therapist interactions in the clinical setting of autism spectrum disorders. Brain Sciences, 11(12), 1555.
-
 
 ```bibtex
 @article{alvari2021eye,
@@ -27,7 +28,7 @@ Alvari, G., Coviello, L., & Furlanello, C. (2021). EYE-C: eye-contact robust det
   year={2021},
   publisher={MDPI}
 }
-
+```
 
 ## Usage
 1. run openpose on the videos to extract the keypoint files
@@ -65,7 +66,7 @@ Arguments:
 _______
 
 References:
-
+```bibtex
 @article{alvari2021eye,
   title={EYE-C: eye-contact robust detection and analysis during unconstrained child-therapist interactions in the clinical setting of autism spectrum disorders},
   author={Alvari, Gianpaolo and Coviello, Luca and Furlanello, Cesare},
@@ -91,4 +92,4 @@ References:
   title = {OpenPose: Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields},
   year = {2019}
 }
-
+```
