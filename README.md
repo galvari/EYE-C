@@ -131,6 +131,20 @@ Arguments:
     --min_duration: Minimum duration threshold for coordination episodes (default: 30 frames).
 ```
 
+---
+---
+
+## **License**
+This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0)**.
+
+You are free to use, modify, and share the code for **non-commercial purposes** as long as proper attribution is given.
+
+For any commercial use or inquiries, please contact the authors at **[your_email@example.com]**.
+
+To view a copy of this license, visit:
+[https://creativecommons.org/licenses/by-nc/4.0/](https://creativecommons.org/licenses/by-nc/4.0/)
+
+---
 
 ---
 
