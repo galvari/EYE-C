@@ -33,6 +33,7 @@ If you use this code, please cite our paper:
   - `extract_gaze.py`: Generates gaze estimation JSON files and renders the video with gaze vectors.
   - `visualize_faces.py`: Visualizes head bounding boxes detected by OpenPose.
   - `estimate_coordination.py`: Calculates gaze coordination between subjects.
+  - `extract_bbox_size.py`: Extracts bounding box sizes from OpenPose keypoint files and saves them in a CSV file.
   - `generate_metrics.py`: Extracts metrics for gaze coordination episodes.
   - `generate_metrics_dataset.py`: Combines multiple metrics files into a single dataset.
   - `generate_coordination_dataset.py`: Creates a dataset of gaze coordination episodes.
@@ -47,16 +48,8 @@ To run the EYE-C pipeline, follow these steps:
 ### Step 1: Run OpenPose
 Run OpenPose on your videos to generate keypoint JSON files for each frame. Ensure the keypoint files are saved in a designated folder.
 
-### Step 2: Run `visualize_faces.py` (Optional)
-This script can be used to verify the head detection by rendering a video with bounding boxes around detected heads.
-```
-Arguments:
-    input_folder: Folder containing OpenPose keypoint files.
-    input_video: Path to the input video.
-    output_folder: Folder to save the output video.
-```
 
-### Step 3: Run `extract_gaze.py`
+### Step 2: Run `extract_gaze.py`
 This script processes the keypoint files to estimate gaze directions for each subject and renders a video with gaze vectors overlaid.
 ```
 Arguments:
@@ -70,7 +63,16 @@ Arguments:
     --enlarge_boxes: Enlarge the bounding box to improve head cropping.
 ```
 
-### Step 4: Run `estimate_coordination.py`
+### Step 2 (Optional): Run `visualize_faces.py`
+This script can be used to verify the head detection by rendering a video with bounding boxes around detected heads.
+```
+Arguments:
+    input_folder: Folder containing OpenPose keypoint files.
+    input_video: Path to the input video.
+    output_folder: Folder to save the output video.
+```
+
+### Step 3: Run `estimate_coordination.py`
 This script calculates gaze coordination between subjects by identifying whether they are looking at each other in each frame.
 ```
 Arguments:
@@ -80,7 +82,18 @@ Arguments:
     --coordination_factor: Scaling factor to check for coordination (default: 1).
 ```
 
-### Step 5: Run `generate_metrics.py`
+## Extras:
+
+### Run `extract_bbox_size.py`
+Extracts bounding box sizes from OpenPose keypoint files and saves them in a CSV file for further analysis.
+```
+Arguments:
+    input_folder: Folder containing OpenPose keypoint files.
+    input_video: Path to the input video.
+    output_folder: Folder to save the output CSV file.
+```
+
+### Run `generate_metrics.py`
 This script extracts coordination metrics for each video, such as the number and duration of coordination episodes.
 ```
 Arguments:
@@ -88,7 +101,7 @@ Arguments:
     output_folder: Folder to save the metrics CSV files.
 ```
 
-### Step 6: Run `generate_metrics_dataset.py`
+### Run `generate_metrics_dataset.py`
 This script combines coordination metrics from multiple videos into a single dataset for analysis.
 ```
 Arguments:
@@ -98,7 +111,7 @@ Arguments:
     output_dataset_folder: Folder to save the final dataset.
 ```
 
-### Step 7: Run `generate_coordination_dataset.py`
+### Run `generate_coordination_dataset.py`
 Generates a dataset containing detailed gaze coordination metrics for each subject.
 ```
 Arguments:
@@ -107,15 +120,6 @@ Arguments:
     --min_duration: Minimum duration threshold for coordination episodes (default: 30 frames).
 ```
 
-### Step 8: Run `metrics_dataset.py`
-Creates a comprehensive dataset combining gaze coordination metrics with other subject-level information for analysis.
-```
-Arguments:
-    input_json_folder: Folder containing gaze coordination JSON files.
-    input_metrics_folder: Folder containing coordination metrics.
-    input_dataset: Path to the initial dataset.
-    output_folder: Folder to save the final dataset.
-```
 
 ---
 
