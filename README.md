@@ -39,7 +39,7 @@ If you use this code, please cite our paper:
   - `generate_metrics_dataset.py`: Combines multiple metrics files into a single dataset.
   - `generate_coordination_dataset.py`: Creates a dataset of gaze coordination episodes.
   - `metrics_dataset.py`: Generates a comprehensive dataset with coordination metrics.
-- **Run Shell Files**: A set of shell scripts to automate the execution of the EYE-C pipeline from the terminal.
+- **Run Shell Files**: A set of shell scripts to automate the execution of the EYE-C pipeline from the terminal (step 1 to 3).
 
 ---
 
