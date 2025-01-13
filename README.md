@@ -33,6 +33,7 @@ If you use this code, please cite our paper:
   - `extract_gaze.py`: Generates gaze estimation JSON files and renders the video with gaze vectors.
   - `visualize_faces.py`: Visualizes head bounding boxes detected by OpenPose.
   - `estimate_coordination.py`: Calculates gaze coordination between subjects.
+    - `coord_extraction.py`: Extracts metrics from gaze coordination JSON files to identify eye-contact episodes and compute durations.
   - `extract_bbox_size.py`: Extracts bounding box sizes from OpenPose keypoint files and saves them in a CSV file.
   - `generate_metrics.py`: Extracts metrics for gaze coordination episodes.
   - `generate_metrics_dataset.py`: Combines multiple metrics files into a single dataset.
@@ -83,6 +84,16 @@ Arguments:
 ```
 ---
 ## Extras:
+
+### Run `coord_extraction.py`
+Extracts metrics from gaze coordination JSON files to identify coordination episodes, compute durations, and save the results as CSV files with timestamps and frames.
+```
+Arguments:
+    input_folder: Folder containing gaze coordination JSON files.
+    output_metrics_folder: Folder to save the extracted metrics CSV files.
+    --min_duration: Minimum duration threshold for coordination episodes (default: 30 frames).
+```
+
 
 ### Run `extract_bbox_size.py`
 Extracts bounding box sizes from OpenPose keypoint files and saves them in a CSV file for further analysis.
