@@ -8,7 +8,6 @@ This repository includes:
 - **Gaze360**: for gaze vector estimation.
 - **EYE-C**: for eye-contact prediction based on gaze vectors.
 
-### Reference
 For details about the implementation and validation, refer to our paper:
 [EYE-C: Eye-Contact Robust Detection and Analysis during Unconstrained Child-Therapist Interactions in the Clinical Setting of Autism Spectrum Disorders](https://www.mdpi.com/2076-3425/11/12/1555)
 
