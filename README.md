@@ -140,17 +140,16 @@ You are free to use, modify, and share the code for **non-commercial purposes** 
 
 For any commercial use or inquiries, please contact the authors at **[alvari.gianpaolo@gmail.com]**.
 
+To view a copy of this license, visit:
+[https://creativecommons.org/licenses/by-nc/4.0/](https://creativecommons.org/licenses/by-nc/4.0/)
+
 ---
 
-## **Usage of OpenPose and Gaze360 Libraries**
+### **Usage of OpenPose and Gaze360 Libraries**
 This project incorporates tools and methodologies from the OpenPose and Gaze360 libraries. Please note:
 - **OpenPose** is a real-time multi-person 2D pose detection library developed by the CMU Perceptual Computing Lab. For more information, visit [OpenPose GitHub](https://github.com/CMU-Perceptual-Computing-Lab/openpose) and adhere to its license.
 - **Gaze360** is a gaze estimation library developed by the MIT CSAIL team. For more information, visit [Gaze360 GitHub](https://github.com/erkil1452/gaze360) and adhere to its license.
 - Users must comply with the respective terms and licenses of these libraries when using or distributing this project.
----
-
-To view a copy of this license, visit:
-[https://creativecommons.org/licenses/by-nc/4.0/](https://creativecommons.org/licenses/by-nc/4.0/)
 
 
 ---
