@@ -81,7 +81,7 @@ Arguments:
     --output_folder: Folder to save the output video (optional).
     --coordination_factor: Scaling factor to check for coordination (default: 1).
 ```
-
+---
 ## Extras:
 
 ### Run `extract_bbox_size.py`
