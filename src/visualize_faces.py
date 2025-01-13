@@ -1,3 +1,7 @@
+# visualize_faces.py
+# Author: Gianpaolo Alvari, Luca Coviello
+# Description: This script extracts head bounding boxes from OpenPose keypoint JSON files and renders a video with bounding boxes drawn around detected heads.
+
 import argparse
 import glob
 import json
@@ -10,28 +14,35 @@ from tqdm import tqdm
 
 from utils import extract_all_faces
 
-
-'''
-Script to extract heads from openpose keypoints (json files) and render a video with headboxes
-'''
+# ---------------------------------------------
+# Argument Parser
+# ---------------------------------------------
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Visualize video with openpose heads.")
+    """
+    Parses command-line arguments for the script.
+    Returns:
+        Namespace: Parsed arguments.
+    """
+    parser = argparse.ArgumentParser(description="Visualize video with OpenPose head bounding boxes.")
 
     parser.add_argument(
         "input_folder",
         type=str,
-        help="Folder where openpose keypoints files are stored",
+        help="Folder where OpenPose keypoints JSON files are stored.",
     )
-    parser.add_argument("input_video", type=str, help="Input video")
+    parser.add_argument("input_video", type=str, help="Path to the input video file.")
     parser.add_argument(
-        "output_folder", type=str, help="Where to store the output video"
+        "output_folder",
+        type=str,
+        help="Folder where the output video with head bounding boxes will be saved.",
     )
 
-    # read and parse command line arguments
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
+# ---------------------------------------------
+# Main Function
+# ---------------------------------------------
 
 def main():
     args = parse_args()
@@ -40,36 +51,44 @@ def main():
     video_name = args.input_video
     output_video_name = Path(args.output_folder) / f"{Path(video_name).stem}_heads.mp4"
 
-    # find and sort all json files
+    # Find and sort all JSON files in the input folder
     keypoint_files = sorted(glob.glob(str(input_folder / "*.json")))
-    video_stream = imageio.get_reader(video_name)
 
+    # Open the input video and prepare the output video writer
+    video_stream = imageio.get_reader(video_name)
     fps = video_stream.get_meta_data()["fps"]
     out_video = imageio.get_writer(output_video_name, fps=fps)
+
+    print("Processing video frames and drawing head bounding boxes...")
 
     for i, json_file in enumerate(tqdm(keypoint_files)):
         frame = video_stream.get_next_data()
         with open(json_file) as f:
             j = json.load(f)
 
+        # Extract people information from the JSON file
         people = j["people"]
         faces_pts, heads_bbox = extract_all_faces(people)
 
+        # Draw bounding boxes around detected heads
         for face, head in zip(faces_pts, heads_bbox):
             cv2.rectangle(
                 frame,
-                tuple(head[:2].round().astype(np.int)),
-                tuple((head[:2] + head[2:]).round().astype(np.int)),
+                tuple(head[:2].round().astype(np.int32)),
+                tuple((head[:2] + head[2:]).round().astype(np.int32)),
                 (255, 0, 0),
                 3,
             )
 
+        # Convert frame to uint8 type and write to the output video
         frame = frame.astype(np.uint8)
         out_video.append_data(frame)
 
+    # Close the video streams
     video_stream.close()
     out_video.close()
 
+    print(f"Output video saved to: {output_video_name}")
 
 if __name__ == "__main__":
     main()

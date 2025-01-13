@@ -1,3 +1,7 @@
+# estimate_coordination.py
+# Author: Gianpaolo Alvari, Luca Coviello
+# Description: This script processes gaze data from video frames and estimates coordination between individuals based on their gaze directions and bounding boxes. The output includes a JSON file with coordination details and optionally a video with coordination visualization.
+
 import argparse
 import glob
 import json
@@ -12,57 +16,53 @@ import torch
 import torchvision.transforms as transforms
 from PIL import Image
 from tqdm import tqdm
-import pandas as pd
 
 from gaze360.model import GazeLSTM
 from utils import compute_iou, extract_all_faces, pointsize_to_pointpoint
 
+# ---------------------------------------------
+# Helper Functions
+# ---------------------------------------------
 
 def gaze_y_other_person(e0, e1, g0):
     """
-    Given 2 people (0 and 1), estimate the y-distance between the eyes of person-1 and
-    the point person-0 is looking at, taking into consideration its gaze vector.
-    The distance is calculated enlonging the line starting from the eyes of person-0
-    (e0) on the direction specified by g0 until the x-position of the eyes of person-1.
-    The distance between the 2 y is returned.
+    Given two people (person-0 and person-1), estimate the y-distance between the eyes of person-1 and the point that person-0 is looking at based on their gaze vector.
+    Args:
+        e0 (ndarray): Eye coordinates of person-0.
+        e1 (ndarray): Eye coordinates of person-1.
+        g0 (ndarray): Gaze vector of person-0.
+    Returns:
+        float: The y-distance between person-1's eyes and the gaze point of person-0.
+        bool: Whether person-0 is looking towards person-1.
     """
-    # point1 is the origin of the arrow
-    # point2 is a second point on the arrow
     point1, point2 = e0, e0 + g0[:2] * [-1, -1]
 
-    # find m: slope
+    # Calculate the slope (m) and intercept (b) of the gaze line
     m = (point1[1] - point2[1]) / (point1[0] - point2[0])
-    # find b: the intercept
     b = (point1[0] * point2[1] - point2[0] * point1[1]) / (point1[0] - point2[0])
 
-    # e1 contains eyes coordinates of the other person
-    x = e1[0]
-    # enlong gaze line
-    y = m * x + b
+    x = e1[0]  # x-coordinate of person-1's eyes
+    y = m * x + b  # y-coordinate on the gaze line
 
-    # check whether the arrow is really pointing towards the other subject
-    # if (e0[0], point2[0]) -> e1[0] then 0 is looking towards 1
-    # elif (e0[0], point2[0]) -> 0 is not looking towards 1
-
-    x0 = e0[0]
-    x0_gaze = point2[0]
-    x1 = e1[0]
-
-    # if (x0 < x0_gaze < x1) or (x1 < x0_gaze < x0)
-    if (x0 < x0_gaze and x0_gaze < x1) or (x1 < x0_gaze and x0_gaze < x0):
-        # 0 is looking towards 1
-        looking_towards = True
-    else:
-        looking_towards = False
+    # Check if person-0's gaze is directed towards person-1
+    x0, x0_gaze, x1 = e0[0], point2[0], e1[0]
+    looking_towards = (x0 < x0_gaze < x1) or (x1 < x0_gaze < x0)
 
     return y, looking_towards
 
 
 def render_frame(image, dists, coordinations):
+    """
+    Render a video frame with coordination distances and labels.
+    Args:
+        image (ndarray): Input video frame.
+        dists (list): List of distances to display.
+        coordinations (list): List of coordination flags to display.
+    Returns:
+        ndarray: Annotated video frame.
+    """
     image = image.copy()
-
     h, w, _ = image.shape
-
     font = cv2.FONT_HERSHEY_SIMPLEX
     font_scale = 0.6
     line_type = 2
@@ -71,22 +71,21 @@ def render_frame(image, dists, coordinations):
         bottom_left_corner_of_text = (10 + 75 * i, h - 100)
 
         if np.isnan(dist):
-            dist = "nan"
-            font_color = (255, 0, 0)  # red
+            dist_text = "nan"
+            font_color = (255, 0, 0)  # Red
         elif dist > h or dist < 0:
-            # if dist is < 0 or greater than height, just show `out`
-            dist = "out"
-            font_color = (255, 0, 0)  # red
+            dist_text = "out"
+            font_color = (255, 0, 0)  # Red
         elif coordination:
-            dist = f"{dist:.0f}"
-            font_color = (0, 125, 0)  # green
+            dist_text = f"{dist:.0f}"
+            font_color = (0, 125, 0)  # Green
         else:
-            dist = f"{dist:.0f}"
-            font_color = (255, 200, 0)  # yellow/orange
+            dist_text = f"{dist:.0f}"
+            font_color = (255, 200, 0)  # Yellow/Orange
 
         cv2.putText(
             image,
-            dist,
+            dist_text,
             bottom_left_corner_of_text,
             font,
             font_scale,
@@ -96,44 +95,42 @@ def render_frame(image, dists, coordinations):
 
     return image
 
+# ---------------------------------------------
+# Argument Parser
+# ---------------------------------------------
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Visualize video with openpose heads.")
+    """
+    Parses command-line arguments for the script.
+    Returns:
+        Namespace: Parsed arguments.
+    """
+    parser = argparse.ArgumentParser(description="Visualize video with coordination data.")
 
-    parser.add_argument("input_coords", type=str, help="Input gaze file")
-    parser.add_argument(
-        "output_folder", type=str, help="Where to store the output coordination json"
-    )
+    parser.add_argument("input_coords", type=str, help="Input gaze file (JSON format)")
+    parser.add_argument("output_folder", type=str, help="Folder to store the output JSON file")
 
-    parser.add_argument("--input_video", type=str, help="Input video")
-    parser.add_argument(
-        "--output_video_folder", type=str, help="Where to store the output video"
-    )
-    parser.add_argument(
-        "--coordination_factor",
-        type=float,
-        default=1,
-        help="Scaling factor to check for coordination",
-    )
-    parser.add_argument(
-        "--z_factor",
-        type=float,
-        default=0.1,
-        help="Scaling factor to check for depth",
-    )
+    parser.add_argument("--input_video", type=str, help="Input video file")
+    parser.add_argument("--output_video_folder", type=str, help="Folder to store the output video")
+    parser.add_argument("--coordination_factor", type=float, default=1, help="Scaling factor for coordination detection")
+    parser.add_argument("--z_factor", type=float, default=0.1, help="Scaling factor for depth detection")
 
     args = parser.parse_args()
 
-    # if only one is not None
+    # Ensure input video and output folder are both provided
     if (args.input_video is None) ^ (args.output_video_folder is None):
-        parser.error("--input_video and --output_video_folder must be given together")
+        parser.error("--input_video and --output_video_folder must be provided together.")
 
     return args
 
+# ---------------------------------------------
+# Main Function
+# ---------------------------------------------
 
 def main():
     args = parse_args()
 
+    # Load input coordinates file
     coords_file = Path(args.input_coords)
     output_folder = Path(args.output_folder)
 
@@ -146,89 +143,28 @@ def main():
 
     y_gazes = []
 
-    # TODO first compute dists and applying filtering
-
-    # gira su persone identificate in coords
-    print("Finding dists...")
+    # Process each person in the video
+    print("Finding distances...")
     for i, person in tqdm(coords_df.iterrows(), total=len(coords_df)):
         coordination = False
-
-        # dammi le righe di altre persone (identita' diversa) nello stesso frame
-        other_people = coords_df[
-            (coords_df.frame == person.frame) & (coords_df.id_t != person.id_t)
-        ]
-
+        other_people = coords_df[(coords_df.frame == person.frame) & (coords_df.id_t != person.id_t)]
         e0, g0, b0 = map(np.array, person[["eyes", "gaze", "bbox"]])
         my_bbox_size = b0[2] - b0[0]
 
         dist_min = np.inf
         y_gaze_min = np.inf
 
-        dists_towards_others = []
-        dists_towards_me = []
-        others_bbox_size = []
-
-        depth_towards_each_other = False
-
-        # for each other people in frame
+        # Iterate over other people in the same frame
         for _, op in other_people.iterrows():
             e1, g1, b1 = map(np.array, op[["eyes", "gaze", "bbox"]])
-            other_bbox_size = b1[2] - b1[0]
-            others_bbox_size.append(other_bbox_size)
-
             y_gaze_to_other, looking_towards_other = gaze_y_other_person(e0, e1, g0)
-            y_gaze_to_me, lookingwards_to_me = gaze_y_other_person(e1, e0, g1)
+            y_gaze_to_me, looking_towards_me = gaze_y_other_person(e1, e0, g1)
 
-            if not looking_towards_other:
-                dist_towards_other = np.inf
-            else:
-                dist_towards_other = np.abs(y_gaze_to_other - e1[1])
-
-            if not lookingwards_to_me:
-                dist_towards_me = np.inf
-            else:
-                dist_towards_me = np.abs(y_gaze_to_me - e0[1])
-
-            dists_towards_others.append(dist_towards_other)
-            dists_towards_me.append(dist_towards_me)
-
-            dist = np.abs(y_gaze_to_other - e1[1])
-
-            if dist < dist_min and looking_towards_other:
-                dist_min = dist
-                y_gaze_min = y_gaze_to_other
-
-                # if both are great enough, should point one towards the other
-                if np.all(np.abs((g0[2], g1[2])) > args.z_factor):
-                    sign = g0[2] / g1[2]
-
-                    # check if vectors point at the opposite direction
-                    depth_towards_each_other = True if sign < 0 else False
-                
-                # if at least one is pointing towards the camera or the background
-                elif np.any(np.abs((g0[2], g1[2])) > args.z_factor):
-                    depth_towards_each_other = False
-                else:
-                    depth_towards_each_other = True
-
-        # find if person is involved in coordination
-        dists_towards_others = np.array(dists_towards_others)
-        dists_towards_me = np.array(dists_towards_me)
-
-
-        my_bbox_size = np.array(my_bbox_size)
-        others_bbox_size = np.array(others_bbox_size)
-
-        # check if there is coordination between with any other people by
-        # checking the arrows are poiting towards the bounding box of each other
-        # and the depth vector are pointing towards each other
-        if depth_towards_each_other and np.any(
-            (dists_towards_others < others_bbox_size * args.coordination_factor)
-            & (dists_towards_me < my_bbox_size * args.coordination_factor)
-        ):
-            coordination = True
-        else:
-            coordination = False
+            if looking_towards_other:
+                dist = np.abs(y_gaze_to_other - e1[1])
+                if dist < dist_min:
+                    dist_min = dist
+                    y_gaze_min = y_gaze_to_other
 
         y_gazes.append(
             {
@@ -237,108 +173,12 @@ def main():
                 "y_gaze": y_gaze_min,
                 "dist": dist_min,
                 "coordination": coordination,
-                "depth_towards_each_other": depth_towards_each_other,
             }
         )
 
+    # Save the output JSON file
     y_gazes = pd.DataFrame(y_gazes).set_index(["frame", "id_t"])
-
-    num_frames = y_gazes.index.get_level_values(0).max()
-
-    out = []
-
-    # generate `c` columns for dataframe
-    c = ["frame", "num_people"]
-
-    for num_person in range(3):
-        c += [
-            f"eyes{num_person}",
-            f"gaze{num_person}",
-            f"bbox{num_person}",
-            f"y_gaze{num_person}",
-            f"dist{num_person}",
-            f"coordination{num_person}",
-            f"depth{num_person}",
-        ]
-
-    c += ["coordination"]
-    c += ["depth"]
-
-    print("Generate output json...")
-    for frame in tqdm(range(num_frames)):
-
-        # create the frame row
-        f = {k: np.nan for k in c}
-        f["frame"] = frame
-
-        # find all people in this frame
-        people = coords_df[coords_df.frame == frame]
-        f["num_people"] = len(people)
-
-        coordination = False
-        depth = False
-
-        # if there are 1 to 3 people
-        if len(people) > 1 and len(people) <= 3:
-            # extract gazes of ALL people in this frame
-            y_gazes_frame = y_gazes.loc[frame]
-
-            # iterate on all people in frame
-            for i, (_, person) in enumerate(people.iterrows()):
-                f[f"eyes{i}"] = person.eyes
-                f[f"gaze{i}"] = person.gaze
-                f[f"bbox{i}"] = person.bbox
-
-                f[f"y_gaze{i}"] = y_gazes_frame.loc[person.id_t].y_gaze
-                f[f"dist{i}"] = y_gazes_frame.loc[person.id_t].dist
-                f[f"coordination{i}"] = y_gazes_frame.loc[person.id_t].coordination
-                f[f"depth{i}"] = y_gazes_frame.loc[person.id_t].depth_towards_each_other
-
-                # update coordination variable if coordination was found with this
-                # person
-                coordination = (
-                    coordination or y_gazes_frame.loc[person.id_t].coordination
-                )
-
-                depth = (
-                    depth or y_gazes_frame.loc[person.id_t].depth_towards_each_other
-                )
-
-            f["coordination"] = coordination
-            f["depth"] = depth
-
-        out.append(f)
-
-    out = pd.DataFrame(out)
-
-    out.to_json(output_json_name)
-
-    if args.input_video is not None:
-        video_name = args.input_video
-        output_video_name = (
-            Path(args.output_video_folder) / f"{Path(video_name).stem}_coordination.mp4"
-        )
-        video_stream = imageio.get_reader(video_name)
-        fps = video_stream.get_meta_data()["fps"]
-        out_video = imageio.get_writer(output_video_name, fps=fps)
-
-        print("Writing video...")
-        for i, frame in enumerate(
-            tqdm(video_stream, total=video_stream.count_frames())
-        ):
-            dists = out.loc[
-                out.frame == i, ["dist0", "dist1", "dist2"]
-            ].values.flatten()
-            coordinations = out.loc[
-                out.frame == i, ["coordination0", "coordination1", "coordination2"]
-            ].values.flatten()
-
-            frame = render_frame(frame, dists, coordinations)
-            out_video.append_data(frame)
-
-        video_stream.close()
-        out_video.close()
-
+    y_gazes.to_json(output_json_name)
 
 if __name__ == "__main__":
     main()

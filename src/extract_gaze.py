@@ -1,3 +1,8 @@
+# extract_gaze.py
+# Author: Gianpaolo Alvari, Luca Coviello
+# Description: This script processes video frames and corresponding OpenPose keypoint JSON files to predict gaze directions using a pretrained Gaze360 model.
+# The output includes a video with gaze directions visualized and a JSON file with gaze data.
+
 import argparse
 import glob
 import json
@@ -16,8 +21,18 @@ from tqdm import tqdm
 from gaze360.model import GazeLSTM
 from utils import compute_iou, extract_all_faces, pointsize_to_pointpoint
 
+# ---------------------------------------------
+# Helper Functions
+# ---------------------------------------------
 
 def spherical2cartesial(x):
+    """
+    Converts spherical gaze coordinates to Cartesian coordinates.
+    Args:
+        x (Tensor): Spherical coordinates tensor with shape (N, 2).
+    Returns:
+        Tensor: Cartesian coordinates tensor with shape (N, 3).
+    """
     output = torch.zeros(x.size(0), 3)
     output[:, 2] = -torch.cos(x[:, 1]) * torch.cos(x[:, 0])
     output[:, 0] = torch.cos(x[:, 1]) * torch.sin(x[:, 0])
@@ -26,6 +41,14 @@ def spherical2cartesial(x):
 
 
 def find_id(bbox, id_dict):
+    """
+    Finds the tracking ID for a bounding box based on Intersection over Union (IoU).
+    Args:
+        bbox (list): Bounding box coordinates [x1, y1, x2, y2].
+        id_dict (dict): Dictionary of tracked IDs with their corresponding bounding boxes.
+    Returns:
+        int: Matching tracking ID or None if no match is found.
+    """
     id_final = None
     max_iou = 0.5
     for k in id_dict.keys():
@@ -36,63 +59,76 @@ def find_id(bbox, id_dict):
 
 
 def render_frame(image, eyes, gaze, bbox):
+    """
+    Draws bounding boxes and gaze arrows on the video frame.
+    Args:
+        image (ndarray): Input video frame.
+        eyes (list): Coordinates of the eyes.
+        gaze (list): Gaze direction in Cartesian coordinates.
+        bbox (list): Bounding box coordinates [x1, y1, x2, y2].
+    Returns:
+        ndarray: Modified video frame with annotations.
+    """
     image = image.copy()
     scale = 150 * np.array((-1, -1))
     end_point = eyes + gaze[:2] * scale
     cv2.rectangle(
         image,
-        tuple(bbox[:2].round().astype(np.int)),
-        tuple((bbox[2:]).round().astype(np.int)),
+        tuple(bbox[:2].round().astype(np.int32)),
+        tuple(bbox[2:].round().astype(np.int32)),
         (255, 0, 0),
         3,
     )
     cv2.arrowedLine(
         image,
-        tuple(i for i in eyes.astype(np.int)),
-        tuple(i for i in end_point.astype(np.int)),
+        tuple(eyes.astype(np.int32)),
+        tuple(end_point.astype(np.int32)),
         (255, 255, 0),
         thickness=4,
     )
     return image
 
+# ---------------------------------------------
+# Argument Parser
+# ---------------------------------------------
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Visualize video with openpose heads.")
+    """
+    Parses command-line arguments for the script.
+    Returns:
+        Namespace: Parsed arguments.
+    """
+    parser = argparse.ArgumentParser(description="Visualize video with OpenPose keypoints and gaze directions.")
 
     parser.add_argument(
         "input_folder",
         type=str,
-        help="Folder where openpose keypoints files are stored",
+        help="Folder where OpenPose keypoints files are stored",
     )
-    parser.add_argument("input_video", type=str, help="Input video")
+    parser.add_argument("input_video", type=str, help="Input video file")
     parser.add_argument(
-        "output_video_folder", type=str, help="Folder where to store the output video"
+        "output_video_folder", type=str, help="Folder to store the output video with gaze overlay"
     )
-    parser.add_argument("output_json_folder", type=str, help="Folder where to store the json")
-    parser.add_argument("--use_cuda", action="store_true", help="Whether to use GPU")
+    parser.add_argument("output_json_folder", type=str, help="Folder to store the output JSON file with gaze data")
+    parser.add_argument("--use_cuda", action="store_true", help="Use GPU for inference if available")
     parser.add_argument(
         "--model_weights",
         type=str,
-        help="Checkpoint file of gaze360 model",
         default="models/gaze360_model.pth.tar",
-    )
-
-    # by default these 2 are False
-    parser.add_argument(
-        "--maximize_boxes",
-        action="store_true",
-        help="Whether to set box size as the largest of the same sequence",
+        help="Path to the pretrained Gaze360 model weights",
     )
     parser.add_argument(
-        "--enlarge_boxes",
-        action="store_true",
-        help="Make the box larger of a fixed factor",
+        "--maximize_boxes", action="store_true", help="Set bounding box size to the largest in the sequence"
+    )
+    parser.add_argument(
+        "--enlarge_boxes", action="store_true", help="Enlarge bounding boxes by a fixed factor"
     )
 
-    # read and parse command line arguments
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
+# ---------------------------------------------
+# Main Function
+# ---------------------------------------------
 
 def main():
     args = parse_args()

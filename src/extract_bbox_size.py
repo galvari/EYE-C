@@ -1,3 +1,7 @@
+# extract_bbox_size.py
+# Author: Gianpaolo Alvari, Luca Coviello
+# Description: This script extracts bounding box (bbox) sizes from OpenPose keypoint JSON files and saves the data in a CSV file. The bounding boxes represent detected head regions in each video frame.
+
 import argparse
 import glob
 import json
@@ -10,80 +14,69 @@ from tqdm import tqdm
 
 from utils import extract_all_faces
 
-'''
-Script to extract the bbox sizes from openpose keypoints files and save the data in a csv
-'''
-
+# ---------------------------------------------
+# Argument Parser
+# ---------------------------------------------
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Visualize video with openpose heads.")
+    """
+    Parses command-line arguments for the script.
+    Returns:
+        Namespace: Parsed arguments.
+    """
+    parser = argparse.ArgumentParser(description="Extract bounding box sizes from OpenPose keypoints files.")
 
     parser.add_argument(
         "input_folder",
         type=str,
-        help="Folder where openpose keypoints files are stored",
+        help="Folder where OpenPose keypoints files are stored",
     )
-    parser.add_argument("input_video", type=str, help="Input video")
+    parser.add_argument("input_video", type=str, help="Input video file")
     parser.add_argument(
-        "output_folder", type=str, help="Where to store the output video"
+        "output_folder", type=str, help="Folder to store the output CSV file"
     )
 
-    # read and parse command line arguments
-    args = parser.parse_args()
-    return args
+    return parser.parse_args()
 
+# ---------------------------------------------
+# Main Function
+# ---------------------------------------------
 
 def main():
     args = parse_args()
 
+    # Paths for input and output
     input_folder = Path(args.input_folder)
     video_name = args.input_video
-    output_video_name = Path(args.output_folder) / f"{Path(video_name).stem}_heads.csv"
+    output_csv_name = Path(args.output_folder) / f"{Path(video_name).stem}_heads.csv"
 
-    # find and sort all json files
+    # Find and sort all JSON files in the input folder
     keypoint_files = sorted(glob.glob(str(input_folder / "*.json")))
-    #video_stream = imageio.get_reader(video_name)
 
-    #fps = video_stream.get_meta_data()["fps"]
-    #out_video = imageio.get_writer(output_video_name, fps=fps)
-    hh=[]
+    # Initialize an empty list to store head bounding box data
+    hh = []
 
+    print("Extracting bounding boxes...")
+
+    # Process each keypoint file
     for i, json_file in enumerate(tqdm(keypoint_files)):
-        #frame = video_stream.get_next_data()
         with open(json_file) as f:
             j = json.load(f)
 
         people = j["people"]
+
+        # Extract face points and head bounding boxes using utility function
         faces_pts, heads_bbox = extract_all_faces(people)
 
-        for face, head in zip(faces_pts, heads_bbox):
-            
+        # Store bounding box data
+        for head in heads_bbox:
             hh.append(head)
 
+    # Convert the bounding box data to a DataFrame and save it as a CSV file
+    hh_df = pd.DataFrame(hh, columns=["x", "y", "width", "height"])
+    hh_df.to_csv(output_csv_name, index=False)
 
-
-
-
-            '''
-            cv2.rectangle(
-                frame,
-                tuple(head[:2].round().astype(np.int)),
-                tuple((head[:2] + head[2:]).round().astype(np.int)),
-                (255, 0, 0),
-                3,
-            )
-            '''
-
-        #frame = frame.astype(np.uint8)
-        #out_video.append_data(frame)
-
-    #video_stream.close()
-    #out_video.close()
-
-
-    hh = pd.DataFrame(hh)
-
-    hh.to_csv(output_video_name, index = None)
+    print(f"Bounding box sizes saved to: {output_csv_name}")
 
 if __name__ == "__main__":
     main()
