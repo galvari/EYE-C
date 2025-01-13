@@ -139,7 +139,9 @@ This project is licensed under the **Creative Commons Attribution-NonCommercial 
 You are free to use, modify, and share the code for **non-commercial purposes** as long as proper attribution is given.
 
 For any commercial use or inquiries, please contact the authors at **[alvari.gianpaolo@gmail.com]**.
+
 ---
+
 ## **Usage of OpenPose and Gaze360 Libraries**
 This project incorporates tools and methodologies from the OpenPose and Gaze360 libraries. Please note:
 - **OpenPose** is a real-time multi-person 2D pose detection library developed by the CMU Perceptual Computing Lab. For more information, visit [OpenPose GitHub](https://github.com/CMU-Perceptual-Computing-Lab/openpose) and adhere to its license.
