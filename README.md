@@ -1,9 +1,9 @@
 # EYE-C: A Robust Multi-Person Eye-Contact Detection Framework for Unconstrained Interactions
 
 ## About
-**EYE-C** is a robust multi-person eye-contact detection framework designed for analyzing interactions in real-world clinical settings using a single video camera. The application integrates key components from [OpenPose](https://ieeexplore.ieee.org/document/8765346) and [Gaze360](https://gaze360.csail.mit.edu/) to achieve reliable head detection and gaze estimation.
+**EYE-C** is a robust multi-person **eye-contact detection** framework designed for analyzing interactions in real-world clinical settings using a single video camera. The application integrates key components from **[OpenPose](https://ieeexplore.ieee.org/document/8765346)** and **[Gaze360](https://gaze360.csail.mit.edu/)** to achieve reliable head detection and gaze estimation.
 
-The model was tested and validated in **clinical settings** for autism diagnosis and intervention by analyzing therapist-child and parent-child interactions during both free play and structured screening. **EYE-C** leverages deep learning for **robust head detection and gaze estimation** from single-camera videos of varying resolutions, including low-resolution footage.
+The model was tested and validated in **clinical settings** for autism diagnosis and intervention by analyzing therapist-child and parent-child interactions during both free play and unstructured screening. **EYE-C** leverages deep learning for **robust head detection and gaze estimation** from videos of varying resolutions, including low-resolution footage.
 
 EYE-C aims to support researchers and clinicians in understanding and quantifying social engagement by providing precise, scalable measures of eye-contact. Contributions and feedback are welcome to help improve and extend the framework further.
 
@@ -59,7 +59,7 @@ If you use this code, please cite our paper:
 To run the EYE-C pipeline, follow these steps:
 
 ### Step 0: Install OpenPose and Gaze360
-Before running EYE-C, you need to install and set up **[OpenPose](https://ieeexplore.ieee.org/document/8765346)** and **[Gaze360](https://gaze360.csail.mit.edu/)** following their respective instructions. 
+Before running EYE-C, you need to install and set up **[OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)** and **[Gaze360](https://github.com/erkil1452/gaze360)** following their respective instructions. 
 Make sure to verify that:
 
 * OpenPose is correctly installed and can run on your system.
