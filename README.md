@@ -3,7 +3,17 @@
 ## About
 EYE-C is a robust multi-person eye-contact detection framework designed for analyzing interactions in wild clinical settings using a single video camera. The application integrates key components from [OpenPose](https://ieeexplore.ieee.org/document/8765346) and [Gaze360](https://gaze360.csail.mit.edu/) to achieve reliable head detection and gaze estimation.
 
-The model was tested and validated in clinical setting of diagnosis and intervetion of Autism, by analyzing therapist-child and parent-child interactions during free play and structured screening.
+The model was tested and validated in clinical setting of diagnosis and intervetion of Autism, by analyzing therapist-child and parent-child interactions during free play and structured screening. EYE-C leverages deep learning for robust head detection and gaze estimation from single-camera videos of varying resolutions, including low-resolution footage. 
+EYE-C aims to support researchers and clinicians in understanding and quantifying social engagement by providing precise, scalable measures of eye-contact. We welcome contributions and feedback to help improve and extend the framework further.
+
+
+**Key Features**
+* Custom Eye-Contact Detection: A dedicated deep learning module refines head-gaze data to pinpoint when eye-contact events occur between participants.
+* Multi-Person Support: Track multiple people in the same video frame, making it suitable for therapist-child or parent-child interactions.
+* Works with a Single Camera: Eliminates the need for multiple or specialized camera setups (high/low-resolution), supporting easier deployment in real clinical or home environments.
+* In-the-Wild Applicability: Operates on unstructured, naturalistic sessions—from free play to structured screening.
+* Clinically Tested: Validated in settings focused on autism diagnosis and early intervention, providing crucial data for research on social engagement.
+
 
 This repository includes:
 - **OpenPose**: for head detection.
