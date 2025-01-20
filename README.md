@@ -1,30 +1,29 @@
 # EYE-C: A Robust Multi-Person Eye-Contact Detection Framework for Unconstrained Interactions
 
 ## About
-EYE-C is a robust multi-person eye-contact detection framework designed for analyzing interactions in wild clinical settings using a single video camera. The application integrates key components from [OpenPose](https://ieeexplore.ieee.org/document/8765346) and [Gaze360](https://gaze360.csail.mit.edu/) to achieve reliable head detection and gaze estimation.
+**EYE-C** is a robust multi-person eye-contact detection framework designed for analyzing interactions in real-world clinical settings using a single video camera. The application integrates key components from [OpenPose](https://ieeexplore.ieee.org/document/8765346) and [Gaze360](https://gaze360.csail.mit.edu/) to achieve reliable head detection and gaze estimation.
 
-The model was tested and validated in **clinical setting** of diagnosis and intervetion of Autism, by analyzing therapist-child and parent-child interactions during free play and structured screening. EYE-C leverages deep learning for **robust head detection and gaze estimation** from single-camera videos of varying resolutions, including low-resolution footage. 
+The model was tested and validated in **clinical settings** for autism diagnosis and intervention by analyzing therapist-child and parent-child interactions during both free play and structured screening. **EYE-C** leverages deep learning for **robust head detection and gaze estimation** from single-camera videos of varying resolutions, including low-resolution footage.
 
-EYE-C aims to support researchers and clinicians in understanding and quantifying social engagement by providing precise, scalable measures of eye-contact. We welcome contributions and feedback to help improve and extend the framework further.
-
+EYE-C aims to support researchers and clinicians in understanding and quantifying social engagement by providing precise, scalable measures of eye-contact. Contributions and feedback are welcome to help improve and extend the framework further.
 
 **Key Features:**
-* Custom Eye-Contact Detection: A dedicated deep learning module refines head-gaze data to pinpoint when eye-contact events occur between participants.
-* Multi-Person Support: Track multiple people in the same video frame, making it suitable for therapist-child or parent-child interactions.
-* Works with a Single Camera: Eliminates the need for multiple or specialized camera setups (high/low-resolution), supporting easier deployment in real clinical or home environments.
-* In-the-Wild Applicability: Operates on unstructured, naturalistic sessions—from free play to structured screening.
-* Clinically Tested: Validated in settings focused on autism diagnosis and early intervention, providing crucial data for research on social engagement.
-
+- **Custom Eye-Contact Detection**: A dedicated deep learning module refines head-gaze data to pinpoint when eye-contact events occur between participants.
+- **Multi-Person Support**: Tracks multiple people in the same video frame, making it suitable for therapist-child or parent-child interactions.
+- **Works with a Single Camera**: Eliminates the need for multiple or specialized camera setups (high/low-resolution), supporting easier deployment in clinical or home environments.
+- **In-the-Wild Applicability**: Operates on unstructured, naturalistic sessions—from free play to structured screening.
+- **Clinically Tested**: Validated in settings focused on autism diagnosis and early intervention, providing crucial data for research on social engagement.
 
 This repository includes:
 - **OpenPose**: for head detection.
 - **Gaze360**: for gaze vector estimation.
 - **EYE-C**: for eye-contact prediction based on gaze vectors.
 
-For details about the implementation and validation, refer to our paper:
-[EYE-C: Eye-Contact Robust Detection and Analysis during Unconstrained Child-Therapist Interactions in the Clinical Setting of Autism Spectrum Disorders](https://www.mdpi.com/2076-3425/11/12/1555)
+For more details about the implementation and validation, refer to our paper:
+> [EYE-C: Eye-Contact Robust Detection and Analysis during Unconstrained Child-Therapist Interactions in the Clinical Setting of Autism Spectrum Disorders](https://www.mdpi.com/2076-3425/11/12/1555)
 
 If you use this code, please cite our paper:
+
 ```bibtex
 @article{alvari2021eye,
   title={EYE-C: eye-contact robust detection and analysis during unconstrained child-therapist interactions in the clinical setting of autism spectrum disorders},
@@ -36,6 +35,7 @@ If you use this code, please cite our paper:
   year={2021},
   publisher={MDPI}
 }
+
 ```
 
 ---
@@ -57,6 +57,13 @@ If you use this code, please cite our paper:
 
 ## Usage Guide
 To run the EYE-C pipeline, follow these steps:
+
+### Step 0: Install OpenPose and Gaze360
+Before running EYE-C, you need to install and set up **[OpenPose](https://ieeexplore.ieee.org/document/8765346)** and **[Gaze360](https://gaze360.csail.mit.edu/)** following their respective instructions. 
+Make sure to verify that:
+
+* OpenPose is correctly installed and can run on your system.
+* Gaze360 is properly configured, including its model weights (e.g., a .pt file) for gaze estimation.
 
 ### Step 1: Run OpenPose
 Run OpenPose on your videos to generate keypoint JSON files for each frame. Ensure the keypoint files are saved in a designated folder.
