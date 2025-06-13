@@ -72,7 +72,7 @@ This project integrates the following external libraries as Git submodules:
 To clone this repository with all dependencies:
 ```bash
 git clone --recursive https://github.com/YOUR_USERNAME/EYE-C.git
-
+```
 
 ### Step 1: Run OpenPose
 Run OpenPose on your videos to generate keypoint JSON files for each frame. Ensure the keypoint files are saved in a designated folder.
