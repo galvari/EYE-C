@@ -62,13 +62,13 @@ To run the EYE-C pipeline, follow these steps:
 Before running EYE-C, you need to install and set up **[OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)** and **[Gaze360](https://github.com/erkil1452/gaze360)** following their respective instructions. 
 
 
-This project integrates the following external libraries as Git submodules:
+This project integrates the following external libraries as Git Submodules:
 - **[OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)**: Real-time multi-person 2D pose estimation
   - *Citation: Cao et al., "OpenPose: Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields", IEEE TPAMI, 2019*
 - **[Gaze360](https://github.com/erkil1452/gaze360)**: Physically unconstrained gaze estimation in the wild
   - *Citation: Kellnhofer et al., "Gaze360: Physically unconstrained gaze estimation in the wild", ICCV, 2019*
 
-#### Installation with Submodules
+
 To clone this repository with all dependencies:
 ```bash
 git clone --recursive https://github.com/YOUR_USERNAME/EYE-C.git
