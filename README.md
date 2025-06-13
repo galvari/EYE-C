@@ -58,12 +58,21 @@ If you use this code, please cite our paper:
 ## Usage Guide
 To run the EYE-C pipeline, follow these steps:
 
-### Step 0: Install OpenPose and Gaze360
+### Step 0: Install OpenPose and Gaze360 Submodules
 Before running EYE-C, you need to install and set up **[OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)** and **[Gaze360](https://github.com/erkil1452/gaze360)** following their respective instructions. 
-Make sure to verify that:
 
-* OpenPose is correctly installed and can run on your system.
-* Gaze360 is properly configured, including its model weights (e.g., a .pt file) for gaze estimation.
+
+This project integrates the following external libraries as Git submodules:
+- **[OpenPose](https://github.com/CMU-Perceptual-Computing-Lab/openpose)**: Real-time multi-person 2D pose estimation
+  - *Citation: Cao et al., "OpenPose: Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields", IEEE TPAMI, 2019*
+- **[Gaze360](https://github.com/erkil1452/gaze360)**: Physically unconstrained gaze estimation in the wild
+  - *Citation: Kellnhofer et al., "Gaze360: Physically unconstrained gaze estimation in the wild", ICCV, 2019*
+
+#### Installation with Submodules
+To clone this repository with all dependencies:
+```bash
+git clone --recursive https://github.com/YOUR_USERNAME/EYE-C.git
+
 
 ### Step 1: Run OpenPose
 Run OpenPose on your videos to generate keypoint JSON files for each frame. Ensure the keypoint files are saved in a designated folder.
