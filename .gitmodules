@@ -1,0 +1,6 @@
+[submodule "src/openpose"]
+	path = src/openpose
+	url = https://github.com/CMU-Perceptual-Computing-Lab/openpose.git
+[submodule "src/gaze360"]
+	path = src/gaze360
+	url = https://github.com/erkil1452/gaze360.git
