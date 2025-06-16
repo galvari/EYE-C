@@ -71,7 +71,7 @@ This project integrates the following external libraries as Git Submodules:
 
 To clone this repository with all dependencies:
 ```bash
-git clone --recursive https://github.com/YOUR_USERNAME/EYE-C.git
+git clone --recursive https://github.com/galvari/EYE-C.git
 ```
 
 ### Step 1: Run OpenPose
