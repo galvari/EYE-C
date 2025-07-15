@@ -282,7 +282,7 @@ def main():
 
     coords = []
 
-    print("Excuting gaze360...")
+    print("Executing gaze360...")
     # for each frame in the video
     for i in tqdm(range(n_frames)):
         image = frames[i].copy()

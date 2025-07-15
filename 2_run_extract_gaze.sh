@@ -36,4 +36,4 @@ done
 
 
 # Example run
-# ./run_extract_gaze.sh <input_keypoints_folder> <input_video_folder> <output_video_folder> <output_json_folder>
+# ./2_run_extract_gaze.sh <input_keypoints_folder> <input_video_folder> <output_video_folder> <output_json_folder>

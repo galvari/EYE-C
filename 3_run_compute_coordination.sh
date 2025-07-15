@@ -27,4 +27,4 @@ for i in ${INPUT_JSON_FOLDER}/*; do
 done
 
 # Example run
-# ./run_compute_coordination_3.sh .../JSON .../dist08_z03 0.8 0.3 .../VideoRendered .../dist08_z03
+# ./3_run_compute_coordination_3.sh .../JSON .../dist08_z03 0.8 0.3 .../VideoRendered .../dist08_z03

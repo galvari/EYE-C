@@ -24,4 +24,4 @@ for i in ${INPUT_FOLDER}/*; do
 done
 
 # Example run
-# ./run_openpose.sh <input_folder> <output_folder>
+# ./1_run_openpose.sh <input_folder> <output_folder>

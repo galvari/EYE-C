@@ -105,7 +105,14 @@ def compute_iou(bb1, bb2):
     # compute the intersection over union by taking the intersection
     # area and dividing it by the sum of prediction + ground-truth
     # areas - the interesection area
-    iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
+    denom = float(bb1_area + bb2_area - intersection_area)
+    if denom <= 0.0:
+        return 0.0
+
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = intersection_area / denom
     eps = 1e-8
 
     if iou <= 0.0 or iou > 1.0 + eps:

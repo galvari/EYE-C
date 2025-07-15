@@ -32,10 +32,17 @@ def gaze_y_other_person(e0, e1, g0):
         e1 (ndarray): Eye coordinates of person-1.
         g0 (ndarray): Gaze vector of person-0.
     Returns:
-        float: The y-distance between person-1's eyes and the gaze point of person-0.
-        bool: Whether person-0 is looking towards person-1.
+        float: The y-distance between person-1's eyes and the gaze point of person-0. If
+            person-0's gaze is vertical (no horizontal displacement), ``np.nan`` is
+            returned instead.
+        bool: Whether person-0 is looking towards person-1. ``False`` is returned if the
+            gaze is vertical.
     """
     point1, point2 = e0, e0 + g0[:2] * [-1, -1]
+
+    # When the gaze vector is vertical we cannot compute the slope; return nan and False
+    if point1[0] == point2[0]:
+        return np.nan, False
 
     # Calculate the slope (m) and intercept (b) of the gaze line
     m = (point1[1] - point2[1]) / (point1[0] - point2[0])
@@ -149,6 +156,7 @@ def main():
         coordination = False
         other_people = coords_df[(coords_df.frame == person.frame) & (coords_df.id_t != person.id_t)]
         e0, g0, b0 = map(np.array, person[["eyes", "gaze", "bbox"]])
+        
         my_bbox_size = b0[2] - b0[0]
 
         dist_min = np.inf
@@ -157,6 +165,8 @@ def main():
         # Iterate over other people in the same frame
         for _, op in other_people.iterrows():
             e1, g1, b1 = map(np.array, op[["eyes", "gaze", "bbox"]])
+            # ``gaze_y_other_person`` returns ``np.nan`` and ``False`` when the
+            # gaze vector is vertical and the slope cannot be computed
             y_gaze_to_other, looking_towards_other = gaze_y_other_person(e0, e1, g0)
             y_gaze_to_me, looking_towards_me = gaze_y_other_person(e1, e0, g1)
 

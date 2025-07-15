@@ -158,9 +158,15 @@ Arguments:
     output_metrics_folder: Folder to save the output metrics.
     --min_duration: Minimum duration threshold for coordination episodes (default: 30 frames).
 ```
+---
+## Testing
+To run the unit tests, install `pytest` and execute:
+```bash
+pytest
+```
 
 ---
----
+
 
 ## **License**
 This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0)**.
